@@ -3,40 +3,61 @@ package Service;
 import DAO.AccountDAO;
 import Model.Account;
 
-import java.util.List;
-
 public class AccountService {
 
+    private static final AccountDAO UserRepository = null;
     private final AccountDAO accountDAO;
 
     public AccountService() {
         this.accountDAO = new AccountDAO();
+    }public static boolean isUsernameTaken(String username) {
+        return UserRepository.getAccountByUsername(username) != null;
     }
+
+    
+    public static Account registerUser(Account account) {
+        return UserRepository.createAccount(account);
+    }
+     // TODO: consider modifying functions to throw exceptions so that the controller can handle them 
 
     public Account createAccount(Account account) {
         // Validate username
-        if (account.getUsername() == null || account.getUsername().isBlank()) {
-            throw new IllegalArgumentException("Username cannot be blank.");
-        }
-        // Validate password length
-        if (account.getPassword() == null || account.getPassword().length() <= 4) {
-            throw new IllegalArgumentException("Password must be longer than 4 characters.");
-        }
-        // Delegate to DAO
-        return accountDAO.saveAccount(account);
+      // Delegate to DAO
+        return accountDAO.createAccountAccount(account);
     }
 
-    // public List<Account> getAllAccounts() {
-    //     return accountDAO.getAllAccounts();
-    // }
+    public Account getAccountByUsername(String username) {
+        Account account = accountDAO.getAccountByUsername(username);
+        if (account != null) {
+            // Hide the password
+            account.setPassword("");
+        }
 
-    // public Account getAccountById(int id) {
-    //     Account account = accountDAO.getAccountById(id);
-    //     if (account == null) {
-    //         throw new IllegalArgumentException("Account with ID " + id + " not found.");
-    //     }
-    //     return account;
-    // }
+        return account;
+    }
+
+    public Account login(Account account) {
+        Account result = accountDAO.getAccountByUsername(account.getUsername());
+        
+        if (result == null) {
+            // Do we throw an exception or return null?
+            throw new IllegalArgumentException("Account with username " + account.getUsername() + " not found.");
+        }
+            
+        // validate password... username already validated in AccountDAO's getAccountByUsername function
+        if (!result.getPassword().equals(account.getPassword())) {
+            return null;
+        }
+        // Hide the password
+        // result.setPassword("");
+        return result;
+    }
+
+    public Object getAccountById(int id) {
+        return accountDAO.getAccountById(id);
+
+    }
+}
 
     // public boolean deleteAccountById(int id) {
     //     if (!accountDAO.deleteAccountById(id)) {
@@ -44,4 +65,5 @@ public class AccountService {
     //     }
     //     return true;
     // }
-}
+
+ 
